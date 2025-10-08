@@ -1,6 +1,6 @@
 # KoderiaJS
 
-Tulis JavaScript dalam **Bahasa Indonesia**! 🇮🇩
+Tulis Kode dalam **Bahasa Indonesia**! 🇮🇩
 
 File `.ina` → compile → file `.js` valid.
 
