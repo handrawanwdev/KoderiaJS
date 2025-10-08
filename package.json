@@ -1,0 +1,21 @@
+{
+  "name": "bahasa-indonesia-js",
+  "version": "1.0.0",
+  "description": "Transpiler Bahasa Indonesia ke JavaScript",
+  "bin": {
+    "indojs": "./dist/cli.js"
+  },
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "postinstall": "npm run build && node scripts/make-executable.js"
+  },
+  "dependencies": {
+    "chalk": "^5.6.2",
+    "commander": "^12.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.7.0",
+    "typescript": "^5.4.0"
+  }
+}

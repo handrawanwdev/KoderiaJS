@@ -1,0 +1,15 @@
+buat x = 10;
+buat xy = x;
+tulis(xy);     // ✅ aman
+
+buat hari = "Selasa";
+buat hari = "Selasa";
+buat ucapan = match hari { "Senin" => "Awali minggu", "Selasa" | "Rabu" => xy };
+
+asinkron fungsi sayTo(){
+    kembalikan "Hello Handrawan";
+}
+
+hasil? value = await sayTo();
+
+tulis(value);
