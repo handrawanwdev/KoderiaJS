@@ -5,11 +5,15 @@ tulis(xy);
 buat hari = "Selasa";
 buat ucapan = match hari { "Senin" => "Awali minggu", "Selasa" | "Rabu" => "Hello Semangat Kerja Baru" };
 
-asinkron fungsi sayTo(){
+latar fungsi sayTo(){
     Desimal x = 20.2;
-    kembalikan "Hello Handrawan";
+    kembalikan x
 }
 
 hasil? value = await sayTo();
+
+fungsi ax(){
+    tulis("TES DOANG")
+}
 
 tulis(value, ucapan);

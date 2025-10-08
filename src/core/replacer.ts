@@ -15,11 +15,11 @@ export function applyReplacements(code: string): string {
 
     // ===== Fungsi =====
     [
-      /\basinkron\s+fungsi\s+([a-zA-Z_$][\w$]*)\s*\((.*?)\)\s*\{/g,
+      /\blatar\s+fungsi\s+([a-zA-Z_$][\w$]*)\s*\((.*?)\)\s*\{/g,
       "async function $1($2) {",
     ],
     [/\bfungsi\s+([a-zA-Z_$][\w$]*)\s*\((.*?)\)\s*\{/g, "function $1($2) {"],
-    [/\bkembalikan\s+(.*?);/g, "return $1;"],
+    [/\bkembalikan\s+(.+)$/gm, "return $1;"],
 
     // ===== Konversi Tipe =====
     [/\bkeAngka\s*\((.*?)\)/g, "Number($1)"],

@@ -10,7 +10,7 @@ interface ScanScope {
 }
 
 const KEYWORDS = new Set([
-  "buat", "tetap", "fungsi", "asinkron", "hasil?", "ambil", "duplikat",
+  "buat", "tetap", "fungsi", "latar", "hasil?", "ambil", "duplikat",
   "Angka", "Desimal", "Teks", "Logika", "match",
   "benar", "salah", "true", "false", "_", "sebagai", "dengan", "jika", "lain", "selama", "untuk", "kembalikan",
 ]);
@@ -31,7 +31,7 @@ export function scanVariablesAndKeywords(lines: string[]) {
     if (line === "}") { scopeStack.pop(); return; }
 
     // ----- Deklarasi fungsi -----
-    const funcMatch = line.match(/^(asinkron\s+)?fungsi\s+(\w+)\s*\(/);
+    const funcMatch = line.match(/^(latar\s+)?fungsi\s+(\w+)\s*\(/);
     if (funcMatch) {
       const [, , funcName] = funcMatch;
       functions.add(funcName);
@@ -120,7 +120,7 @@ export function validateAsyncAwait(lines: string[]) {
   // 1. Scan deklarasi fungsi terlebih dahulu
   lines.forEach((rawLine, i) => {
     const line = rawLine.trim();
-    const funcDefMatch = line.match(/^(asinkron\s+)?fungsi\s+(\w+)\s*\(/);
+    const funcDefMatch = line.match(/^(latar\s+)?fungsi\s+(\w+)\s*\(/);
     if (funcDefMatch) {
       const [, asyncKeyword, funcName] = funcDefMatch;
 
@@ -138,7 +138,7 @@ export function validateAsyncAwait(lines: string[]) {
   let insideAsyncFunction = false;
   lines.forEach((rawLine, i) => {
     const line = rawLine.trim();
-    if (/^asinkron\s+fungsi\s+\w+\s*\(/.test(line)) insideAsyncFunction = true;
+    if (/^latar\s+fungsi\s+\w+\s*\(/.test(line)) insideAsyncFunction = true;
     if (insideAsyncFunction && line.includes("}")) insideAsyncFunction = false;
 
     if (/^hasil\s+\w+\s*=\s*await\b/.test(line) && !insideAsyncFunction) {

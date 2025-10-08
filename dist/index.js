@@ -21,8 +21,12 @@ case "Rabu": ucapan = "Hello Semangat Kerja Baru"; break;
 
 async function sayTo() {
     let x = 20.2;
-    return "Hello Handrawan";
+    return x;
 }
 let value = await __awaitWrap(sayTo());
+
+function ax() {
+    console.log("TES DOANG");
+}
 
 console.log(value, ucapan);
