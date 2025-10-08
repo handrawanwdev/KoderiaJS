@@ -1,4 +1,4 @@
-# BahasaIndoJS
+# KoderiaJS
 
 Tulis JavaScript dalam **Bahasa Indonesia**! 🇮🇩
 
