@@ -1,5 +1,5 @@
 
-async function __awaitWrap(promise) {
+async function __unWrap(promise) {
   try {
     return await promise;
   } catch {
@@ -23,7 +23,7 @@ async function sayTo() {
     let x = 20.2;
     return x;
 }
-let value = await __awaitWrap(sayTo());
+let value = await __unWrap("wawan");
 
 function ax() {
     console.log("TES DOANG");

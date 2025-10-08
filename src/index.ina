@@ -10,7 +10,7 @@ latar fungsi sayTo(){
     kembalikan x
 }
 
-hasil? value = await sayTo();
+hasil? value = await "wawan";
 
 fungsi ax(){
     tulis("TES DOANG")

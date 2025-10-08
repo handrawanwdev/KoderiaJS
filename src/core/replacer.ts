@@ -20,6 +20,8 @@ export function applyReplacements(code: string): string {
     ],
     [/\bfungsi\s+([a-zA-Z_$][\w$]*)\s*\((.*?)\)\s*\{/g, "function $1($2) {"],
     [/\bkembalikan\s+(.+)$/gm, "return $1;"],
+    [/\bsetelJeda\s*\((.*?),(.*?)\);?/g, "setTimeout($1, $2);"],
+    [/\bsetelWaktu\s*\((.*?),(.*?)\);?/g, "setInterval($1, $2);"],
 
     // ===== Konversi Tipe =====
     [/\bkeAngka\s*\((.*?)\)/g, "Number($1)"],
@@ -118,9 +120,9 @@ function applyTopLevelAwaitIfNeeded(code: string): string {
   if (!hasTopLevelAwait) return code; // kalau nggak ada, kembalikan kode asli
 
   // Inject wrapper jika belum ada
-  if (!code.includes("async function __awaitWrap(")) {
+  if (!code.includes("async function __unWrap(")) {
     const wrapper = `
-async function __awaitWrap(promise) {
+async function __unWrap(promise) {
   try {
     return await promise;
   } catch {
@@ -135,7 +137,7 @@ async function __awaitWrap(promise) {
   // Replace 'hasil? nama = await ekspresi;' → top-level await
   code = code.replace(
     /^\s*hasil\?\s+([a-zA-Z_]\w*)\s*=\s*await\s+(.+?);?$/gm,
-    (_, varName, expr) => `let ${varName} = await __awaitWrap(${expr});`
+    (_, varName, expr) => `let ${varName} = await __unWrap(${expr});`
   );
 
   return code;
