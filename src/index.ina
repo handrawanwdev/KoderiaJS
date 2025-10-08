@@ -1,15 +1,15 @@
 buat x = 10;
 buat xy = x;
-tulis(xy);     // ✅ aman
+tulis(xy); 
 
 buat hari = "Selasa";
-buat hari = "Selasa";
-buat ucapan = match hari { "Senin" => "Awali minggu", "Selasa" | "Rabu" => xy };
+buat ucapan = match hari { "Senin" => "Awali minggu", "Selasa" | "Rabu" => "Hello Semangat Kerja Baru" };
 
 asinkron fungsi sayTo(){
+    Desimal x = 20.2;
     kembalikan "Hello Handrawan";
 }
 
 hasil? value = await sayTo();
 
-tulis(value);
+tulis(value, ucapan);

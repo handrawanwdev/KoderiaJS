@@ -1,6 +1,80 @@
 // validator-modular.ts
 import chalk from "chalk";
 
+interface Scope {
+  vars: Set<string>;
+}
+
+interface ScanScope {
+  vars: Set<string>;
+}
+
+const KEYWORDS = new Set([
+  "buat", "tetap", "fungsi", "asinkron", "hasil?", "ambil", "duplikat",
+  "Angka", "Desimal", "Teks", "Logika", "match",
+  "benar", "salah", "true", "false", "_", "sebagai", "dengan", "jika", "lain", "selama", "untuk", "kembalikan",
+]);
+
+export function scanVariablesAndKeywords(lines: string[]) {
+  const errors: string[] = [];
+  const scopeStack: ScanScope[] = [{ vars: new Set() }];
+  const functions = new Set<string>();
+  const BUILTIN_FUNCS = new Set(["tulis"]);
+
+  function currentScope() { return scopeStack[scopeStack.length - 1]; }
+
+  lines.forEach((rawLine, i) => {
+    const line = rawLine.trim();
+
+    // ----- Masuk / Keluar Scope -----
+    if (line.endsWith("{")) { scopeStack.push({ vars: new Set() }); return; }
+    if (line === "}") { scopeStack.pop(); return; }
+
+    // ----- Deklarasi fungsi -----
+    const funcMatch = line.match(/^(asinkron\s+)?fungsi\s+(\w+)\s*\(/);
+    if (funcMatch) {
+      const [, , funcName] = funcMatch;
+      functions.add(funcName);
+      return;
+    }
+
+    // ----- Deklarasi variabel -----
+    const varMatch = line.match(/^(buat|tetap|Angka|Desimal|Teks|Logika|hasil\?)\s+(\w+)/);
+    if (varMatch) {
+      const varName = varMatch[2];
+      currentScope().vars.add(varName);
+      return;
+    }
+
+    // ----- Tokenisasi -----
+    // Skip literal string / angka
+    // Hapus string literal, bisa menggunakan dua tipe kutip " atau '
+    const cleanedLine = line.replace(/(["'])(?:\\.|[^\\])*?\1/g, "");
+    const tokens = cleanedLine.match(/\b\w+\b/g) || [];
+
+    tokens.forEach(token => {
+      if (KEYWORDS.has(token) || functions.has(token) || BUILTIN_FUNCS.has(token)) return;
+
+      // Cek apakah token sudah dideklarasikan di scope manapun
+      let defined = false;
+      for (let s = scopeStack.length - 1; s >= 0; s--) {
+        if (scopeStack[s].vars.has(token)) {
+          defined = true;
+          break;
+        }
+      }
+
+      if (!defined) {
+        errors.push(`Baris ${i + 1}: Variabel "${token}" belum didefinisikan`);
+        errors.push(`> ${rawLine}`);
+      }
+    });
+  });
+
+  return errors;
+}
+
+
 // -------------------- Validasi Dasar --------------------
 export function validateBraces(lines: string[]) {
   const errors: string[] = [];
@@ -334,6 +408,73 @@ function validateMatchAndOwnership(code: string): string {
   return result.join("\n");
 }
 
+export function validateLegacyTypesWithScope(lines: string[]) {
+  const errors: string[] = [];
+  const scopeStack: Scope[] = [{ vars: new Set() }];
+
+  function currentScope() {
+    return scopeStack[scopeStack.length - 1];
+  }
+
+  lines.forEach((rawLine, i) => {
+    const line = rawLine.trim();
+
+    // Masuk scope baru
+    if (line.includes("{")) {
+      scopeStack.push({ vars: new Set() });
+    }
+
+    // Keluar scope
+    if (line.includes("}")) {
+      scopeStack.pop();
+    }
+
+    // Validasi deklarasi legacy type
+    const match = line.match(/^(Angka|Desimal|Teks|Logika)\s+(\w+)\s*=\s*(.+?);?$/);
+    if (match) {
+      const [, type, varName, value] = match;
+      const val = value.trim();
+
+      if (type === "Angka" && !/^-?\d+$/.test(val)) {
+        errors.push(`Baris ${i + 1}: Nilai untuk "Angka" harus bilangan bulat`);
+        errors.push(`> ${line}`);
+      }
+
+      if (type === "Desimal" && !/^-?\d+\.\d+$/.test(val)) {
+        errors.push(`Baris ${i + 1}: Nilai untuk "Desimal" harus angka desimal`);
+        errors.push(`> ${line}`);
+      }
+
+
+      if (type === "Teks" && !/^(['"])(.*)\1$/.test(val)) {
+        errors.push(`Baris ${i + 1}: Nilai untuk "Teks" harus diapit tanda kutip`);
+        errors.push(`> ${line}`);
+      }
+
+      if (type === "Logika" && !["benar", "salah", "true", "false"].includes(val.toLowerCase())) {
+        errors.push(`Baris ${i + 1}: Nilai untuk "Logika" harus "benar", "salah", "true", atau "false"`);
+        errors.push(`> ${line}`);
+      }
+    }
+
+    // Simpan variabel di scope saat ini
+    const varDecl = line.match(/^(buat|tetap|Angka|Desimal|Teks|Logika)\s+(\w+)\s*=/i);
+    if (varDecl) {
+      const varName = varDecl[2];
+      if (currentScope().vars.has(varName)) {
+        errors.push(`Baris ${i + 1}: Variabel "${varName}" sudah dideklarasikan di scope ini`);
+        errors.push(`> ${line}`);
+      } else {
+        currentScope().vars.add(varName);
+      }
+    }
+
+
+   
+  });
+
+  return errors;
+}
 
 
 // -------------------- Custom validation --------------------
@@ -355,6 +496,8 @@ export function validateAll(lines: string[]) {
     ...validateDuplicateVars(lines),
     ...validateOwnershipRust(lines),
     ...validateMatchAndOwnership(lines.join("\n")).includes("Baris") ? [validateMatchAndOwnership(lines.join("\n"))] : [],
+    ...validateLegacyTypesWithScope(lines),
+    ...scanVariablesAndKeywords(lines),
 
   ];
 }
